@@ -13,11 +13,14 @@ contract MyEpicNFT is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    string private baseSvg = "<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 350 350'><style>.base { fill: white; font-family: serif; font-size: 24px; }</style><rect width='100%' height='100%' fill='black' /><text x='50%' y='50%' class='base' dominant-baseline='middle' text-anchor='middle'>";
+    string private svgPartOne = "<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 350 350'><style>.base { fill: white; font-family: serif; font-size: 24px; }</style><rect width='100%' height='100%' fill='";
+    string private svgPartTwo = "'/><text x='50%' y='50%' class='base' dominant-baseline='middle' text-anchor='middle'>";
 
     string[] private firstWords = ["curved", "loutish", "merciful", "lush", "helpful", "feeble", "materialistic", "necessary", "idiotic", "shrill", "dreary", "flagrant", "short", "craven", "mighty", "elastic", "receptive", "melodic", "early", "unhappy"];
     string[] private secondWords = ["shivering", "icy", "public", "busy", "acidic", "orange", "sassy", "impressive", "oafish", "disagreeable", "fancy", "deep", "feeble", "six", "gleaming", "familiar", "weak", "gratis", "berserk", "festive"];
     string[] private thirdWords = ["secretary", "director", "temperature", "data", "employment", "priority", "presence", "message", "vehicle", "thing", "year", "assistance", "girl", "length", "connection", "cousin", "hotel", "clothes", "memory", "student"];
+
+    string[] private colors = ["red", "#08C2A8", "black", "yellow", "blue", "green"];
 
     event NewEpicNFTMinted(address sender, uint256 tokenId);
 
@@ -43,6 +46,12 @@ contract MyEpicNFT is ERC721URIStorage {
         return thirdWords[rand];
     }
 
+    function pickRandomColor(uint256 _tokenId) public view returns (string memory) {
+        uint256 rand = random(string(abi.encodePacked("COLOR", Strings.toString(_tokenId))));
+        rand = rand % colors.length;
+        return colors[rand];
+    }
+
     function random(string memory _input) internal pure returns (uint256) {
         return uint256(keccak256(abi.encodePacked(_input)));
     }
@@ -55,7 +64,8 @@ contract MyEpicNFT is ERC721URIStorage {
         string memory third = pickRandomThirdWord(newItemId);
         string memory combinedWord = string(abi.encodePacked(first, "_", second, "_", third));
 
-        string memory finalSvg = string(abi.encodePacked(baseSvg, combinedWord, "</text></svg>"));
+        string memory randomColor = pickRandomColor(newItemId);
+        string memory finalSvg = string(abi.encodePacked(svgPartOne, randomColor, svgPartTwo, combinedWord, "</text></svg>"));
 
         string memory json = Base64.encode(
             bytes(
